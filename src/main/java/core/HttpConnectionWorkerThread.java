@@ -27,7 +27,7 @@ public class HttpConnectionWorkerThread extends Thread {
 
             final String htmlResponse = "<html><head><title>My http server</title></head><body><h1>Hello</h1></body><html>";
 
-            final String CRLF = "\n\r";
+            final String CRLF = "\r\n";
 
             final String httpResponse = "HTTP/1.1 200 OK" + CRLF
                     + "Content-Type: text/html" + CRLF
