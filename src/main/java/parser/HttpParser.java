@@ -42,8 +42,11 @@ public class HttpParser {
                     if (!isMethodParsed || !isTargetParsed) {
                         throw new HttpParserException(HttpStatusCode.BAD_REQUEST);
                     }
+                    httpRequest.setStringHttpVersion(processingBuffer.toString());
+
                     LOGGER.info("Version: {}", processingBuffer);
                     processingBuffer.delete(0, processingBuffer.length());
+
                     return;
                 } else {
                     throw new HttpParserException(HttpStatusCode.BAD_REQUEST);
@@ -60,6 +63,9 @@ public class HttpParser {
                 } else if (!isTargetParsed) {
                     LOGGER.info("Target resource: {}", processingBuffer);
                     isTargetParsed = true;
+
+                    httpRequest.setRequestTarget(processingBuffer.toString());
+
                     processingBuffer.delete(0, processingBuffer.length());
                 } else {
                     throw new HttpParserException(HttpStatusCode.BAD_REQUEST);

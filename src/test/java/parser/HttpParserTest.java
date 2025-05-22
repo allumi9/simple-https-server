@@ -30,7 +30,23 @@ class HttpParserTest {
             fail(e);
         }
 
+        assertEquals("/", request.getRequestTarget());
         assertEquals(HttpMethod.GET, request.getMethod());
+        assertEquals(HttpVersion.HTTP_1_1, request.getBestCompatibleHttpVersion());
+    }
+
+    @Test
+    void parseHttpRequest_HttpVersionHigherButValid() throws IOException {
+        HttpRequest request = null;
+        try {
+            request = httpParser.parseHttpRequest(getValid_HttpVersionHigherThan1());
+        } catch (HttpParserException e) {
+            fail(e);
+        }
+
+        assertEquals("/", request.getRequestTarget());
+        assertEquals(HttpMethod.GET, request.getMethod());
+        assertEquals(HttpVersion.HTTP_1_1, request.getBestCompatibleHttpVersion());
     }
 
     @Test
@@ -83,6 +99,26 @@ class HttpParserTest {
         }
     }
 
+    @Test
+    void parseHttpRequest_BadHttpVersion() throws IOException {
+        try {
+            httpParser.parseHttpRequest(getInvalid_BadHttpVersion());
+            fail();
+        } catch (HttpParserException e) {
+            assertEquals(e.getErrorCode(), HttpStatusCode.BAD_REQUEST);
+        }
+    }
+
+    @Test
+    void parseHttpRequest_HttpVersionUnsupported() throws IOException {
+        try {
+            httpParser.parseHttpRequest(getInvalid_UnsupportedVersion());
+            fail();
+        } catch (HttpParserException e) {
+            assertEquals(e.getErrorCode(), HttpStatusCode.HTTP_VERSION_NOT_SUPPORTED);
+        }
+    }
+
     private InputStream getValidRequest() {
         String rawData = "GET / HTTP/1.1\r\n" +
                 "Host: localhost:8080\r\n" +
@@ -132,4 +168,23 @@ class HttpParserTest {
 
         return new ByteArrayInputStream(rawData.getBytes(StandardCharsets.US_ASCII));
     }
+
+    private InputStream getInvalid_BadHttpVersion() {
+        String rawData = "GET / HtTP/1.1\r\n";
+
+        return new ByteArrayInputStream(rawData.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    private InputStream getInvalid_UnsupportedVersion() {
+        String rawData = "GET / HTTP/1.0\r\n";
+
+        return new ByteArrayInputStream(rawData.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    private InputStream getValid_HttpVersionHigherThan1() {
+        String rawData = "GET / HTTP/1.7\r\n";
+
+        return new ByteArrayInputStream(rawData.getBytes(StandardCharsets.US_ASCII));
+    }
+
 }
